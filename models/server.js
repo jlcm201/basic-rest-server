@@ -1,3 +1,4 @@
+const { dbConnection } = require('../db/config');
 const express = require('express');
 const cors = require('cors')
 
@@ -8,11 +9,18 @@ class Server {
         this.pathAPI = 'api';
         this.pathUsers = 'users';
 
+        // Connect DB
+        this.connectDB();
+
         // Middlewares
         this.middlewares();
 
         // Routes
         this.routes();
+    };
+
+    async connectDB() {
+        dbConnection();
     };
 
     middlewares() {

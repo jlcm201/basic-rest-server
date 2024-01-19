@@ -1,37 +1,62 @@
 const { request, response } = require('express');
+const bcryptjs = require('bcryptjs');
 
-const userGet = (req = request, res = response) => {
-    const params = {...req.query};
+const User = require('../models/user');
 
-    const { name, apiKey, vDefault } = params;
-    res.json({
-        name, 
-        apiKey,
-        vDefault: vDefault === '',
-        msg: 'Get API - Controller'
-    });
+const userGet = async (req = request, res = response) => {
+    let { limit, page } = req.query;
+    if (isNaN(limit)) limit = 5;
+    if (isNaN(page)) page = 0;
+
+    const query = { state: true };
+    const [count, users] = await Promise.all([
+        User.countDocuments(query),
+        User.find(query).skip(page * limit).limit(limit)
+    ]); 
+
+    res.json({count, users});
 };
 
-const userPost = (req = request, res = response) => {
-    const body = req.body;
-    res.json({
-        ...body,
-        msg: 'Post API - Controller'
-    });
+const userPost = async(req = request, res = response) => {
+    const { name, eMail, password, role } = req.body;
+    const user = new User({ name, eMail, role });
+
+    // Encrypt password
+    const salt = bcryptjs.genSaltSync();
+    user.password = bcryptjs.hashSync(password, salt);
+
+    // Save in DB
+    await user.save();
+    res.json(user);
 };
 
-const userPut = (req = request, res = response) => {
-    const id = req.params.id;
-    res.json({
-        msg: 'Put API - Controller',
-        id
-    });
+const userPut = async (req = request, res = response) => {
+    const { id } = req.params;
+    const { _id, password, google, ...remaining } = req.body;
+
+    // TODO: Valide versus DB
+
+    if (password) {
+        // Encrypt password
+        const salt = bcryptjs.genSaltSync();
+        remaining.password = bcryptjs.hashSync(password, salt);
+    }
+
+    const user = await User.findByIdAndUpdate(id, remaining);
+
+    res.json(user);
 }
 
-const userDelete = (req, res = response) => {
-    res.json({
-        msg: 'Delete API - Controller'
-    });
+const userDelete = async (req = request, res = response) => {
+    const { id } = req.params;
+
+    // Hard delete
+    // const user = await User.findByIdAndDelete(id);
+
+    // Soft delete
+    const user = await User.findByIdAndUpdate(id, { state: false });
+
+    res.json(user);
 };
 
 const userPatch = (req, res = response) => {
