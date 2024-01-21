@@ -49,6 +49,8 @@ const userPut = async (req = request, res = response) => {
 
 const userDelete = async (req = request, res = response) => {
     const { id } = req.params;
+    // Read authenticated user
+    const authUser = req.authUser;
 
     // Hard delete
     // const user = await User.findByIdAndDelete(id);
