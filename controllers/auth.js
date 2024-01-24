@@ -1,5 +1,5 @@
 const { response, request } = require("express");
-const User = require('../models/user');
+const { User } = require('../models');
 const bcryptjs = require('bcryptjs');
 const { createJWT } = require("../helpers/createJWT");
 const jwt = require('jsonwebtoken');
@@ -11,7 +11,7 @@ const login = async (req = request, res = response) => {
 
     try {
         // Validate if email exists
-        const user = await User.where({eMail}).findOne();
+        const user = await User.findOne({eMail}).exec();
         console.log('user:', user);
 
         if (!user) return res.status(400).json({

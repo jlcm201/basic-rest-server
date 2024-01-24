@@ -2,13 +2,20 @@ const { dbConnection } = require('../db/config');
 const express = require('express');
 const cors = require('cors')
 
+const paths = {
+    api: 'api',
+    auth: 'auth',
+    categories: 'categories',
+    products: 'products',
+    search: 'search',
+    users: 'users'
+};
+
 class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT;
-        this.pathAPI = 'api';
-        this.pathUsers = 'users';
-        this.pathAuth = 'auth';
+        this.paths = paths;
 
         // Connect DB
         this.connectDB();
@@ -36,8 +43,11 @@ class Server {
     };
 
     routes() {
-        this.app.use(`/${this.pathAPI}/${this.pathAuth}`, require('../routes/auth'));
-        this.app.use(`/${this.pathAPI}/${this.pathUsers}`, require('../routes/user'));
+        this.app.use(`/${this.paths.api}/${this.paths.auth}`, require('../routes/auth'));
+        this.app.use(`/${this.paths.api}/${this.paths.users}`, require('../routes/user'));
+        this.app.use(`/${this.paths.api}/${this.paths.categories}`, require('../routes/categories'));
+        this.app.use(`/${this.paths.api}/${this.paths.products}`, require('../routes/products'));
+        this.app.use(`/${this.paths.api}/${this.paths.search}`, require('../routes/search'));
     };
 
     listen () {

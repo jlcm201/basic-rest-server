@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const { User } = require('../models');
 const { request, response } = require('express');
 const jwt = require('jsonwebtoken');
 
@@ -14,7 +14,7 @@ const validateJWT = async (req = request, res = response, next) => {
         const authUser = await User.findById(uid).exec();
 
         // user valid
-        if (!authUser || authUser.state === false)  res.status(401).json({
+        if (!authUser || authUser.state === false) res.status(401).json({
             msg: 'invalid token.'
         });
         
